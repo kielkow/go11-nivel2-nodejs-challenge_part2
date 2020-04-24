@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+
 import csvParse from 'csv-parse';
 import path from 'path';
 import fs from 'fs';
