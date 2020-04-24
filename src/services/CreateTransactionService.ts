@@ -27,7 +27,7 @@ class CreateTransactionService {
     if (type === 'outcome') {
       const { total } = await transactionsRepository.getBalance();
 
-      if (value > total) throw new AppError('You reached your limit');
+      if (value > total) throw new AppError('You reached your limit', 401);
     }
 
     // Check category exists

@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import csvParse from 'csv-parse';
 import path from 'path';
 import fs from 'fs';
@@ -14,11 +16,13 @@ interface Request {
 class ImportTransactionsService {
   async execute({ csvFilename }: Request): Promise<Transaction[]> {
     const transactionFilePath = path.join(uploadConfig.directory, csvFilename);
+
+    /*
     const transactionFileExists = await fs.promises.stat(transactionFilePath);
-
     if (transactionFileExists) await fs.promises.unlink(transactionFilePath);
+    */
 
-    const readCSVStream = fs.createReadStream(csvFilename);
+    const readCSVStream = fs.createReadStream(transactionFilePath);
 
     const parseStream = csvParse({
       from_line: 2,
@@ -29,7 +33,6 @@ class ImportTransactionsService {
     const parseCSV = readCSVStream.pipe(parseStream);
 
     const lines: any[] = [];
-    const transactions: Transaction[] = [];
 
     parseCSV.on('data', line => {
       lines.push(line);
@@ -39,18 +42,20 @@ class ImportTransactionsService {
       parseCSV.on('end', resolve);
     });
 
-    lines.map(async line => {
-      const createTransaction = new CreateTransactionService();
+    const transactions: Transaction[] = [];
 
-      const trasaction = await createTransaction.execute({
-        title: line[0],
-        value: line[1],
-        type: line[2],
-        category: line[3],
-      });
+    const createTransaction = new CreateTransactionService();
 
-      transactions.push(trasaction);
-    });
+    for (const line of lines) {
+      transactions.push(
+        await createTransaction.execute({
+          title: line[0],
+          value: line[1],
+          type: line[2],
+          category: line[3],
+        }),
+      );
+    }
 
     return transactions;
   }
