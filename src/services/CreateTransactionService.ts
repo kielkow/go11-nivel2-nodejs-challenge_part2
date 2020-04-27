@@ -5,7 +5,6 @@ import Transaction from '../models/Transaction';
 import Category from '../models/Category';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
-import CreateCategoryService from './CreateCategoryService';
 
 interface Request {
   title: string;
@@ -39,19 +38,22 @@ class CreateTransactionService {
       },
     });
 
+    // Create Transaction
     if (!checkCategoryExists) {
-      const createCategoryService = new CreateCategoryService();
-
-      const newCategory = await createCategoryService.execute({
+      const transactionCategory = categoriesRepository.create({
         title: category,
       });
+
+      await categoriesRepository.save(transactionCategory);
 
       const transaction = await transactionsRepository.save({
         title,
         value,
         type,
-        category_id: newCategory.id,
+        category: transactionCategory,
       });
+
+      delete transaction.category;
 
       return transaction;
     }
@@ -60,8 +62,10 @@ class CreateTransactionService {
       title,
       value,
       type,
-      category_id: checkCategoryExists.id,
+      category: checkCategoryExists,
     });
+
+    delete transaction.category;
 
     return transaction;
   }

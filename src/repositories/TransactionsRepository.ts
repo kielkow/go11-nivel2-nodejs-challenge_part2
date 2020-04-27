@@ -17,14 +17,14 @@ class TransactionsRepository extends Repository<Transaction> {
 
     const income = transactions.reduce((sum, transaction) => {
       if (transaction.type === 'income') {
-        return sum + transaction.value;
+        return sum + Number(transaction.value);
       }
       return sum;
     }, 0);
 
     const outcome = transactions.reduce((sum, transaction) => {
       if (transaction.type === 'outcome') {
-        return sum + transaction.value;
+        return sum + Number(transaction.value);
       }
       return sum;
     }, 0);
